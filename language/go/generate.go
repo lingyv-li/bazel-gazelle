@@ -36,6 +36,7 @@ func (gl *goLang) GenerateRules(args language.GenerateArgs) language.GenerateRes
 	// Extract information about proto files. We need this to exclude .pb.go
 	// files and generate go_proto_library rules.
 	c := args.Config
+	gc := getGoConfig(c)
 	pcMode := getProtoMode(c)
 
 	// This is a collection of proto_library rule names that have a corresponding
@@ -81,7 +82,7 @@ func (gl *goLang) GenerateRules(args language.GenerateArgs) language.GenerateRes
 	genFiles := append([]string{}, args.GenFiles...)
 	if !pcMode.ShouldIncludePregeneratedFiles() {
 		keep := func(f string) bool {
-			for _, suffix := range []string{".pb.go", "_grpc.pb.go"} {
+			for _, suffix := range gc.goProtoPregeneratedSuffixes {
 				if strings.HasSuffix(f, suffix) {
 					if _, ok := protoFileInfo[strings.TrimSuffix(f, suffix)+".proto"]; ok {
 						return false

@@ -90,6 +90,12 @@ type goConfig struct {
 	// goProtoCompilersSet indicates whether goProtoCompiler was set explicitly.
 	goProtoCompilersSet bool
 
+	// goProtoPregeneratedSuffixes suffixes that are used to ignore pregenerated files from .proto files.
+	goProtoPregeneratedSuffixes []string
+
+	// goProtoPregeneratedSuffixesSet indicates whether goProtoPregeneratedSuffixes was set explicitly.
+	goProtoPregeneratedSuffixesSet []string
+
 	// goGrpcCompilers is the gRPC compiler(s) to use for go code.
 	goGrpcCompilers []string
 
@@ -130,6 +136,7 @@ type goConfig struct {
 var (
 	defaultGoProtoCompilers = []string{"@io_bazel_rules_go//proto:go_proto"}
 	defaultGoGrpcCompilers  = []string{"@io_bazel_rules_go//proto:go_grpc"}
+	defaultGoProtoPregeneratedSuffixes = []string{".pb.go", "_grpc.pb.go", ".pb.gw.go"}
 )
 
 func newGoConfig() *goConfig {
@@ -372,6 +379,10 @@ func (*goLang) RegisterFlags(fs *flag.FlagSet, cmd string, c *config.Config) {
 			"go_proto_compiler",
 			"go_proto_library compiler to use (may be repeated)")
 		fs.Var(
+			&gzflag.MultiFlag{Values: &gc.goProtoPregeneratedSuffixes, IsSet: &gc.goProtoPregeneratedSuffixesSet},
+			"go_proto_pregenerated_suffixes",
+			"suffixes of pregenerated files from .proto to exclude in Default mode (may be repeated)")
+		fs.Var(
 			&gzflag.MultiFlag{Values: &gc.goGrpcCompilers, IsSet: &gc.goGrpcCompilersSet},
 			"go_grpc_compiler",
 			"go_proto_library compiler to use for gRPC (may be repeated)")
@@ -574,6 +585,16 @@ Update io_bazel_rules_go to a newer version in your WORKSPACE file.`
 				} else {
 					gc.goProtoCompilersSet = true
 					gc.goProtoCompilers = splitValue(d.Value)
+				}
+
+			case "go_proto_pregenerated_suffixes":
+				// Special syntax (empty value) to reset directive.
+				if d.Value == "" {
+					gc.goProtoPregeneratedSuffixesSet = false
+					gc.goProtoPregeneratedSuffixes = defaultGoProtoPregeneratedSuffixes
+				} else {
+					gc.goProtoPregeneratedSuffixesSet = true
+					gc.goProtoPregeneratedSuffixes = splitValue(d.Value)
 				}
 
 			case "go_visibility":

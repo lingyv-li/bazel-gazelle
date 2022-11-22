@@ -76,8 +76,8 @@ type Mode int
 const (
 	// DefaultMode generates proto_library rules. Other languages should generate
 	// library rules based on these (e.g., go_proto_library) and should ignore
-	// checked-in generated files (e.g., .pb.go files) when there is a .proto
-	// file with a similar name.
+	// checked-in generated files (e.g., .pb.go files, control with go_proto_pregenerated_suffixes
+	// flag) when there is a .proto file with a similar name.
 	DefaultMode Mode = iota
 
 	// DisableMode ignores .proto files and generates empty proto_library rules.
